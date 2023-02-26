@@ -10,10 +10,17 @@ build:
 test:
 	go test ./... -v
 
-example:
-	go generate example.go
+example: FORCE
+	go generate ./example/example.go
+
+FORCE: ;
+
+example-run: example
+	go build -o ./example/example.go
+	./e
+	rm ./e
 
 clean:
 	rm -f ${BINARY_NAME}
 	rm -f ${GOPATH}/bin/${BINARY_NAME}
-	rm -f example_rabbitmq_publisher.go
+	rm -f example/example_rabbitmq_publisher.go

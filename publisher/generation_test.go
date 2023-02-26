@@ -50,7 +50,7 @@ func (suite *GenerationSuite) removeTmp() {
 func (suite *GenerationSuite) copyGenerator() string {
 	suite.T().Helper()
 
-	name, err := CopyIntoDir(generatorName, suite.tmpDir)
+	name, err := CopyIntoDir(filepath.Join("generator", generatorName), suite.tmpDir)
 	if err != nil {
 		suite.T().Fatal(err)
 	}
