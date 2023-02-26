@@ -46,9 +46,31 @@ func main() {
 		log.Fatalln("Output has wrong extention")
 	}
 
-	outPath := filepath.Join(dir, *output)
+	g := NewGenerator(filepath.Join(dir, *output))
 
-	if err := os.WriteFile(outPath, []byte("package main"), os.ModePerm); err != nil {
+	g.Add("package main")
+
+	g.Write()
+}
+
+type Generator struct {
+	path   string
+	buffer strings.Builder
+}
+
+func NewGenerator(path string) *Generator {
+	return &Generator{
+		path: path,
+	}
+}
+
+func (g *Generator) Add(input string) error {
+	_, err := g.buffer.Write([]byte(input))
+	return err
+}
+
+func (g *Generator) Write() {
+	if err := os.WriteFile(g.path, []byte(g.buffer.String()), os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
 }
