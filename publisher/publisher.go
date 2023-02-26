@@ -5,6 +5,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"io"
 	"log"
 	"os"
@@ -36,8 +39,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	name := os.Getenv("GOFILE")
 	if len(*output) == 0 {
-		name := os.Getenv("GOFILE")
 		if name == "" {
 			log.Fatalln("This file must be run via go:generate")
 		}
@@ -50,12 +53,71 @@ func main() {
 
 	g.Add("package main")
 
+	_, err = g.parser.findStructByName(name, *typeName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, f := range g.parser.Fields() {
+		fmt.Printf("Field: %v, Type: %v\n", f.name, f.fieldType)
+	}
+
 	g.Write()
+}
+
+type Parser struct {
+	structType *ast.StructType
+}
+
+type Field struct {
+	name      *ast.Ident
+	fieldType ast.Expr
+}
+
+func (p *Parser) Fields() []*Field {
+	list := []*Field{}
+
+	for _, field := range p.structType.Fields.List {
+		list = append(list, &Field{
+			name:      field.Names[0],
+			fieldType: field.Type,
+		})
+	}
+
+	return list
+}
+
+func (p *Parser) findStructByName(filename, structName string) (*ast.StructType, error) {
+	// Create a new file set and parse the Go file.
+	fset := token.NewFileSet()
+	astFile, err := parser.ParseFile(fset, filename, nil, parser.ParseComments)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing file: %v", err)
+	}
+
+	// Traverse the AST and find the struct by name.
+	for _, decl := range astFile.Decls {
+		if genDecl, ok := decl.(*ast.GenDecl); ok && genDecl.Tok == token.TYPE {
+			for _, spec := range genDecl.Specs {
+				if typeSpec, ok := spec.(*ast.TypeSpec); ok && typeSpec.Name.Name == structName {
+					if structType, ok := typeSpec.Type.(*ast.StructType); ok {
+						// Found the struct by name.
+						p.structType = structType
+						return structType, nil
+					}
+				}
+			}
+		}
+	}
+
+	// Struct not found by name.
+	return nil, fmt.Errorf("struct not found: %v", structName)
 }
 
 type Generator struct {
 	path   string
 	buffer strings.Builder
+	parser Parser
 }
 
 func NewGenerator(path string) *Generator {
