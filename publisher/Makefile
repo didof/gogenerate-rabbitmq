@@ -12,6 +12,10 @@ test:
 
 example: FORCE
 	go generate ./example/example.go
+	go build -o ./example/e ./example/example.go ./example/example_rabbitmq_publisher.go
+	@echo "Running the executable!\n"
+	@./example/e
+	@rm -f ./example/e
 
 FORCE: ;
 
@@ -23,4 +27,4 @@ example-run: example
 clean:
 	rm -f ${BINARY_NAME}
 	rm -f ${GOPATH}/bin/${BINARY_NAME}
-	rm -f example/example_rabbitmq_publisher.go
+	rm -f example/e example/example_rabbitmq_publisher.go

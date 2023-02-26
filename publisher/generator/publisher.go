@@ -66,7 +66,7 @@ func main() {
 	g.Sprintf("type RabbitMQPublisher%s struct {\n", *typeName)
 	g.Sprintf("\tmsg *%s\n", *typeName)
 	g.Sprintf("}\n\n")
-	g.Sprintf("func (s *RabbitMQPublisher%s) Eureka() {\n\tfmt.Println(\"eureka\")\n}", *typeName)
+	g.Sprintf("func (s *RabbitMQPublisher%s) Eureka() {\n\tfmt.Println(\"eureka!\")\n}", *typeName)
 
 	g.Write()
 }
