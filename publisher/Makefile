@@ -5,7 +5,7 @@ generate: build
 	go generate ./...
 
 build:
-	go build -o ${BINARY_NAME} publisher.go
+	go build -o ${BINARY_NAME} ./generator/publisher.go
 
 test:
 	go test ./... -v
