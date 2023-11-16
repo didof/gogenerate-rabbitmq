@@ -1,4 +1,1 @@
 # gogenerate-rabbitmq
-
-
-p2!
